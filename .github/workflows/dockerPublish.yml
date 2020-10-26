@@ -33,6 +33,7 @@ jobs:
           VERSION=workflow-release
           if [ "${{ github.event_name }}" = "release" ]; then
           VERSION=manual-release
+          fi
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
