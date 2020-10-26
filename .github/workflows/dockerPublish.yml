@@ -31,14 +31,19 @@ jobs:
         run: |
           DOCKER_IMAGE=nuwcdivnpt/stig-manager-test
           VERSION=workflow-release
+          BRANCH=main
           if [ "${{ github.event_name }}" = "release" ]; then
           VERSION=manual-release
           fi
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           fi
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+          fi
           TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${VERSION}"
           echo ::set-output name=version::${VERSION}
+          echo ::set-output name=branch::${BRANCH}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')                    
       - 
@@ -60,7 +65,7 @@ jobs:
 #           pull: true
           push: true
           build-args: |
-            COMMIT_BRANCH=${{ github.event.repository.name }}
+            COMMIT_BRANCH=${{ steps.prep.outputs.branch }}
             COMMIT_SHA=${{ github.sha }}
             COMMIT_TAG=${{ steps.prep.outputs.tags }}
             COMMIT_DESCRIBE=Image built on ${{ steps.prep.outputs.created }}
